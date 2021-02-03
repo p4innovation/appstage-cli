@@ -11,4 +11,6 @@ Gem::Specification.new do |s|
   s.files     = Dir.glob("{lib,bin}/**/*") # This includes all files under the lib directory recursively, so we don't have to add each one individually.
   s.executables = ['appstage']
   s.require_path = 'lib'
+  s.add_dependency 'httparty', '~>0.18.1'
+  s.add_dependency 'mimemagic', '~>0.3.5'
 end
