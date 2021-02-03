@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'appstage'
+puts AppStage::execute
+

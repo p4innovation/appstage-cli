@@ -9,5 +9,6 @@ Gem::Specification.new do |s|
   s.homepage  = 'http://p4.io'
   s.license   = 'MIT'
   s.files     = Dir.glob("{lib,bin}/**/*") # This includes all files under the lib directory recursively, so we don't have to add each one individually.
+  s.executables = ['appstage']
   s.require_path = 'lib'
 end
