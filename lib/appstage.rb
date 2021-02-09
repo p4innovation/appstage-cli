@@ -12,11 +12,28 @@ module AppStage
     options = {}
 
     option_parser = OptionParser.new do |parser|
-      parser.banner = "Usage: appstagecli.rb [options]"
+      parser.banner = "Usage: appstage <command> [options]"
+
+      parser.separator " Commands:-"
+
+      parser.on("-u", "--upload", "Upload a file to the live build release") do |c|
+        options[:upload] = c
+      end
+
+      parser.on("-d", "--delete [PATTERN]", "Delete a file to the live build release") do |c|
+        options[:delete] = c
+      end
+
+      parser.on("-l", "--list [PATTERN]", "Lists files the live build release") do |c|
+        options[:list] = c
+      end
+
 
       parser.on("-h", "--help", "Show this help message") do ||
         puts parser
       end
+
+      parser.separator " Options:-"
 
       parser.on("-j", "--jwttoken JWT", "Your appstage.io account JWT token") do |v|
         options[:jwt] = v
@@ -36,6 +53,27 @@ module AppStage
     end
 
     option_parser.parse!
+
+    puts options.inspect
+    if options[:upload].nil? && options.key?(:delete) && options.key?(:list)
+      puts option_parser.help
+      exit 1
+    end
+
+    puts "lets do work"
+
+    if options.key?(:list)
+      exit ListFiles.new(options).execute
+    end
+
+    puts "done"
+
+    puts options[:command]
+    if options[:command] == 'delete'
+      puts 'delete'
+      Deleter.new(option_parser).execute
+      return
+    end
 
     if options[:filename].nil? || options[:jwt].nil? || options[:project_id].nil?
       puts option_parser.help
