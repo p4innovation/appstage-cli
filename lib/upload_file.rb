@@ -36,8 +36,8 @@ module AppStage
 
       direct_response = HTTParty.put(direct_url,
           :body => file_contents,
-          :headers => headers,
-          :debug_output => $stdout
+          :headers => headers
+          #,:debug_output => $stdout
         )
 
       puts "Finishing upload..."
@@ -52,11 +52,11 @@ module AppStage
       response = HTTParty.post(host+"/api/live_builds.json",
           :body => json,
           :headers => { 'Content-Type' => 'application/json',
-                        'Authorization' => "Bearer #{token}"},
-          :debug_output => $stdout
+                        'Authorization' => "Bearer #{token}"}
+          #,:debug_output => $stdout
         )
 
-      puts "all done!"
+      response.code == 200 ? 0 : response.code
     end
   end
 end

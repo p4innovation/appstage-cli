@@ -60,7 +60,7 @@ module AppStage
     end
 
     if options.key?(:list)
-      files = ListFiles.new(options).execute['release_files']
+      files = ListFiles.new(options).execute
       puts "#{files.count} files"
 
       files.each do |rf|
