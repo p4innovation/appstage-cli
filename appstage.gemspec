@@ -13,4 +13,5 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.add_dependency 'httparty', '~>0.18.1'
   s.add_dependency 'mimemagic', '~>0.3.5'
+  s.add_dependency 'faraday', '~>2.3.0'
 end

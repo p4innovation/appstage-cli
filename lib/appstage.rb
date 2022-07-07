@@ -16,7 +16,7 @@ module AppStage
 
       parser.separator " Commands:-"
 
-      parser.on("-u", "--upload", "Upload a file to the live build release") do |c|
+      parser.on("-u", "--upload [PATTERN]", "Upload a file to the live build release") do |c|
         options[:upload] = c
       end
 
@@ -43,10 +43,6 @@ module AppStage
         options[:project_id] = v
       end
 
-      parser.on("-f", "--file FILENAME", "The file to upload") do |v|
-        options[:filename] = v
-      end
-
       parser.on("-h", "--host HOSTURL", "The appstage host, optional, leave blank to use live server") do |v|
         options[:host] = v
       end
@@ -54,7 +50,7 @@ module AppStage
 
     option_parser.parse!
 
-    if options[:upload].nil? && options.key?(:delete) && options.key?(:list)
+    if !options.key?(:upload) && !options.key?(:delete) && !options.key?(:list)
       puts option_parser.help
       exit 1
     end

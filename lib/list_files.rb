@@ -6,7 +6,8 @@ class ListFiles
   end
 
   def execute
-    host = @options[:host] or "https://appstage.io"
+    puts @options
+    host = @options[:host] || "https://appstage.io"
     token = @options[:jwt]
     pattern = @options[:list].nil? ? ".*" : Regexp.escape(@options[:list])
 
@@ -14,6 +15,7 @@ class ListFiles
         :headers => { 'Content-Type' => 'application/json',
                       'Authorization' => "Bearer #{token}"}
     )
+    puts response.body
     files_json = JSON.parse(response.body)['release_files'].select{|f| f['name'].match(/#{pattern}/)}
 
     return files_json

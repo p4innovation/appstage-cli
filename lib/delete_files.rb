@@ -7,9 +7,12 @@ module AppStage
 
     def execute
       files_json = ListFiles.new(@options).execute
-      pattern = @options[:delete].nil? ? ".*" : Regexp.escape(@options[:list])
+      pattern = @options[:delete].nil? ? "*.*" : Regexp.escape(@options[:delete])
+      
+      puts files_json
+      puts pattern
 
-      matching_files = files_json.select{|f| f['name'].match(/#{Regexp.escape(pattern)}/)}
+      matching_files = files_json.select{|f| f['name'].match(/#{pattern}/)}
       puts "Deleting #{matching_files.count} files"
 
       matching_files.each do |rf|
