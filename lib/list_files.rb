@@ -1,25 +1,33 @@
 module AppStage
 
-class ListFiles
-  def initialize(options)
-    @options = options
+  class ListFiles
+    def initialize(options)
+      @options = options
+    end
+
+    def execute
+      begin
+        getFileList.each do |rf|
+          puts "#{rf['name']}: #{rf['built']}"
+        end
+      rescue Exception => e
+        puts "File listing failed - #{e.message}"
+        return 1
+      end
+      0
+    end
+
+    def getFileList
+      host = @options[:host] || "https://appstage.io"
+      token = @options[:jwt]
+      pattern = @options[:list].nil? ? ".*" : Regexp.escape(@options[:list])
+
+      response = HTTParty.get(host+"/api/live_builds.json",
+          :headers => { 'Content-Type' => 'application/json',
+                        'Authorization' => "Bearer #{token}"}
+      )
+      JSON.parse(response.body)['release_files'].select{|f| f['name'].match(/#{pattern}/)}
+    end
   end
-
-  def execute
-    puts @options
-    host = @options[:host] || "https://appstage.io"
-    token = @options[:jwt]
-    pattern = @options[:list].nil? ? ".*" : Regexp.escape(@options[:list])
-
-    response = HTTParty.get(host+"/api/live_builds.json",
-        :headers => { 'Content-Type' => 'application/json',
-                      'Authorization' => "Bearer #{token}"}
-    )
-    puts response.body
-    files_json = JSON.parse(response.body)['release_files'].select{|f| f['name'].match(/#{pattern}/)}
-
-    return files_json
-  end
-end
 
 end

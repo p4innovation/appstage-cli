@@ -28,7 +28,6 @@ module AppStage
         options[:list] = c
       end
 
-
       parser.on("-h", "--help", "Show this help message") do ||
         puts parser
       end
@@ -48,7 +47,13 @@ module AppStage
       end
     end
 
-    option_parser.parse!
+    begin
+      option_parser.parse!
+    rescue Exception => e
+      puts "Invalid invocation - #{e.message}"
+      puts option_parser.help
+      exit 1
+    end
 
     if !options.key?(:upload) && !options.key?(:delete) && !options.key?(:list)
       puts option_parser.help
@@ -56,14 +61,7 @@ module AppStage
     end
 
     if options.key?(:list)
-      files = ListFiles.new(options).execute
-      puts "#{files.count} files"
-
-      files.each do |rf|
-        puts rf['name']
-      end
-
-      exit 0
+      exit ListFiles.new(options).execute
     end
 
     if options.key?(:delete)

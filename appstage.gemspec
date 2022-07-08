@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name      = 'appstage'
-  s.version   = '0.0.1'
+  s.version   = '0.0.2'
   s.platform  = Gem::Platform::RUBY
   s.summary   = 'Appstage.io CLI gem'
   s.description = "Allows upload and control of the live stage content"

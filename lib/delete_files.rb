@@ -6,21 +6,23 @@ module AppStage
     end
 
     def execute
-      files_json = ListFiles.new(@options).execute
-      pattern = @options[:delete].nil? ? "*.*" : Regexp.escape(@options[:delete])
-      
-      puts files_json
-      puts pattern
+      begin
+        files_json = ListFiles.new(@options).getFileList
+        pattern = @options[:delete] || ".*"
 
-      matching_files = files_json.select{|f| f['name'].match(/#{pattern}/)}
-      puts "Deleting #{matching_files.count} files"
+        matching_files = files_json.select{|f| f['name'].match(/#{pattern}/)}
+        puts "Deleting #{matching_files.count} files"
 
-      matching_files.each do |rf|
-        puts " deleting #{rf['name']}"
-        delete_file(rf['id'])
+        matching_files.each do |rf|
+          puts " deleting #{rf['name']}"
+          #delete_file(rf['id'])
+        end
+
+      rescue Exception => e
+        puts "Delete failed - #{e.message}"
+        return 1
       end
-
-      return 0
+      0
     end
 
   private
