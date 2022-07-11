@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name      = 'appstage'
-  s.version   = '0.0.4'
+  s.version   = '0.0.5'
   s.platform  = Gem::Platform::RUBY
   s.summary   = 'Appstage.io CLI gem'
   s.description = "Allows upload and control of the live stage content"
@@ -14,4 +14,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'httparty', '~>0.18.1'
   s.add_dependency 'mimemagic', '~>0.3.5'
   s.add_dependency 'faraday', '~>2.3.0'
+  s.add_dependency 'faraday-multipart', '~>1.0.4'
+  s.add_dependency 'faraday-httpclient', '~> 2.0'
 end
