@@ -3,6 +3,9 @@ require 'optparse'
 require 'httparty'  #GEM
 require 'mimemagic' #GEM
 require 'digest'
+require 'list_files'
+require 'delete_files'
+require 'upload_file'
 
 module AppStage
 
