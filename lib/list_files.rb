@@ -8,7 +8,7 @@ module AppStage
     def execute
       begin
         getFileList.each do |rf|
-          puts "#{rf['name']}: #{rf['built']}"
+          puts "#{rf['name']}"
         end
       rescue Exception => e
         puts "File listing failed - #{e.message}"

@@ -1,6 +1,4 @@
 #Appstage cli for uploading live builds
-#Inspiration from https://cameronbothner.com/activestorage-beyond-rails-views/
-
 require 'optparse'
 require 'httparty'  #GEM
 require 'mimemagic' #GEM

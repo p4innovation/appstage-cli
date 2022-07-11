@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name      = 'appstage'
-  s.version   = '0.0.2'
+  s.version   = '0.0.3'
   s.platform  = Gem::Platform::RUBY
   s.summary   = 'Appstage.io CLI gem'
   s.description = "Allows upload and control of the live stage content"
@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email     = ['appstage@p4innovation.com']
   s.homepage  = 'http://p4.io'
   s.license   = 'MIT'
-  s.files     = Dir.glob("{lib,bin}/**/*") # This includes all files under the lib directory recursively, so we don't have to add each one individually.
+  s.files     = ['lib/appstage.rb', 'lib/list_files.rb', 'lib/upload_file.rb', 'lib/delete_files.rb']
   s.executables = ['appstage']
   s.require_path = 'lib'
   s.add_dependency 'httparty', '~>0.18.1'
