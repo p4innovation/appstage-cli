@@ -15,7 +15,7 @@ module AppStage
 
         matching_files.each do |rf|
           puts " deleting #{rf['name']}"
-          #delete_file(rf['id'])
+          delete_file(rf['id'])
         end
 
       rescue Exception => e

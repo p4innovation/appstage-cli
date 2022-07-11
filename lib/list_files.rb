@@ -26,7 +26,8 @@ module AppStage
           :headers => { 'Content-Type' => 'application/json',
                         'Authorization' => "Bearer #{token}"}
       )
-      JSON.parse(response.body)['release_files'].select{|f| f['name'].match(/#{pattern}/)}
+      raise "Server error #{response.code}" if response.code != 200
+      files = JSON.parse(response.body)['release_files'].select{|f| f['name'].match(/#{pattern}/)}
     end
   end
 
