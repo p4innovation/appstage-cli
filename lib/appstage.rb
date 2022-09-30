@@ -1,7 +1,6 @@
 #Appstage cli for uploading live builds
 require 'optparse'
 require 'httparty'  #GEM
-require 'mimemagic' #GEM
 require 'digest'
 require 'list_files'
 require 'delete_files'
