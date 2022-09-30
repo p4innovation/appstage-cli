@@ -18,7 +18,7 @@ module AppStage
     end
 
     def getFileList
-      host = @options[:host] || "https://appstage.io"
+      host = @options[:host] || "https://www.appstage.io"
       token = @options[:jwt]
       pattern = @options[:list].nil? ? ".*" : Regexp.escape(@options[:list])
 

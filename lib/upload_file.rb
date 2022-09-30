@@ -1,7 +1,3 @@
-require 'faraday'
-require 'faraday/multipart'
-require 'faraday/httpclient'
-
 module AppStage
 
   class UploadFile
@@ -11,7 +7,7 @@ module AppStage
 
     def execute
       begin
-        host = @options[:host] || "https://appstage.io"
+        host = @options[:host] || "https://www.appstage.io"
         file_path = File.expand_path(@options[:upload])
         content_type = MimeMagic.by_path(file_path) || "application/octet-stream"
         file_contents = File.open(file_path).read
@@ -39,15 +35,12 @@ module AppStage
         headers = response_json['direct_upload']['headers']
         headers['Connection'] = 'keep-alive'
 
-        conn = Faraday.new(url: direct_url, headers: headers) do |f|
-          f.request :multipart
-          f.adapter :httpclient
-        end
-
-        direct_response = conn.put('') do |req|
-          req.options.timeout = 5000
-          req.body =  file_contents
-        end
+        response_json = HTTParty.put(direct_url,
+            multipart: true,
+            headers: headers,
+            body: file_contents
+        )
+        response_json = JSON.parse(response.body)
 
         cloud_stored_file = response_json['signed_id']
 

@@ -2,6 +2,7 @@
 require 'optparse'
 require 'httparty'  #GEM
 require 'digest'
+require 'mimemagic'
 require 'list_files'
 require 'delete_files'
 require 'upload_file'

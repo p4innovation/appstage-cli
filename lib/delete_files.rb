@@ -28,7 +28,7 @@ module AppStage
   private
 
     def delete_file(file_id)
-      host = @options[:host] or "https://appstage.io"
+      host = @options[:host] or "https://www.appstage.io"
       token = @options[:jwt]
 
       response = HTTParty.delete(host+"/api/live_builds/#{file_id}.json",
