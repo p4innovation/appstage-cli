@@ -1,6 +1,6 @@
 # Appstage CLI
 
-[![Gem Version](https://badge.fury.io/rb/mixlib-cli.svg)](https://badge.fury.io/rb/mixlib-cli)
+[![Gem Version](https://badge.fury.io/rb/appstage.svg)](https://badge.fury.io/rb/appstage)
 
 A CLI gem to allow uploading to project live builds on [appstage.io](https://wwww.appstage.io)
 
