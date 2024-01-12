@@ -37,6 +37,20 @@ Usage: appstage <command> [options]
     -h, --host HOSTURL               The appstage host, optional, leave blank to use live server
 ```
 
+Example shell script used within a CI build script:-
+
+```
+# Delete current live apks
+appstage -d .apk -j $APPSTAGE_JWT
+
+# Upload new build files
+FILES="*.apk"
+for f in $FILES
+do
+	appstage -u "$f" -j $APPSTAGE_JWT
+done
+```
+
 ## License & Copyright
 
 - Copyright:: Copyright (c) 2023-2024 P4 Innovation Ltd
