@@ -1,12 +1,12 @@
 Gem::Specification.new do |s|
   s.name      = 'appstage'
-  s.version   = '0.0.7'
+  s.version   = '0.0.8'
   s.platform  = Gem::Platform::RUBY
   s.summary   = 'Appstage.io CLI gem'
-  s.description = "Allows upload and control of the live stage content"
+  s.description = "List, Upload and Delete live build content on appstage.io"
   s.authors   = ['P4 Innovation Ltd']
-  s.email     = ['appstage@p4innovation.com']
-  s.homepage  = 'http://p4.io'
+  s.email     = ['hello@appstage.io']
+  s.homepage  = 'https://www.appstage.io'
   s.license   = 'MIT'
   s.files     = ['lib/appstage.rb', 'lib/list_files.rb', 'lib/upload_file.rb', 'lib/delete_files.rb']
   s.executables = ['appstage']

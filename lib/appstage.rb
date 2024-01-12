@@ -13,7 +13,8 @@ module AppStage
     options = {}
 
     option_parser = OptionParser.new do |parser|
-      parser.banner = "Usage: appstage <command> [options]"
+      parser.banner = "Appstage CLI V#{Gem::Specification::load("appstage.gemspec").version}\n" <<
+        "Usage: appstage <command> [options]"
 
       parser.separator " Commands:-"
 
@@ -29,7 +30,7 @@ module AppStage
         options[:list] = c
       end
 
-      parser.on("-h", "--help", "Show this help message") do ||
+      parser.on("-h", "--help", "Show this help message") do
         puts parser
       end
 

@@ -20,7 +20,7 @@ module AppStage
     def getFileList
       host = @options[:host] || "https://www.appstage.io"
       token = @options[:jwt]
-      pattern = @options[:list].nil? ? ".*" : Regexp.escape(@options[:list])
+      pattern = @options[:list].nil? ? ".*" : @options[:list]
 
       response = HTTParty.get(host+"/api/live_builds.json",
           :headers => { 'Content-Type' => 'application/json',
