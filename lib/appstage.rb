@@ -6,6 +6,7 @@ require 'mimemagic'
 require 'list_files'
 require 'delete_files'
 require 'upload_file'
+require 'version'
 
 module AppStage
 
@@ -13,7 +14,7 @@ module AppStage
     options = {}
 
     option_parser = OptionParser.new do |parser|
-      parser.banner = "Appstage CLI V#{Gem::Specification::load("appstage.gemspec").version}\n" <<
+      parser.banner = "Appstage CLI V#{Appstage::VERSION}\n" <<
         "Usage: appstage <command> [options]"
 
       parser.separator " Commands:-"

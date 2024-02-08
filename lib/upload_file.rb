@@ -27,23 +27,22 @@ module AppStage
             :body => json,
             :headers => { 'Content-Type' => 'application/json',
                           'Authorization' => "Bearer #{token}"}
-          )
-
+        )        
         response_json = JSON.parse(response.body)
+        raise(response_json['error']) unless response.code == 200
 
         direct_url = response_json['direct_upload']['url']
         headers = response_json['direct_upload']['headers']
         headers['Connection'] = 'keep-alive'
 
-        response_json = HTTParty.put(direct_url,
+        response = HTTParty.put(direct_url,
             multipart: true,
             headers: headers,
             body: file_contents
         )
-        response_json = JSON.parse(response.body)
+        raise(response_json['error']) unless response.code == 200
 
         cloud_stored_file = response_json['signed_id']
-
         json = {
           release_file: {
             cloud_stored_file: cloud_stored_file
@@ -51,16 +50,17 @@ module AppStage
         }.to_json
 
         response = HTTParty.post(host+"/api/live_builds.json",
-            :body => json,
-            :headers => { 'Content-Type' => 'application/json',
-                          'Authorization' => "Bearer #{token}"}
-          )
+          :body => json,
+          :headers => { 'Content-Type' => 'application/json',
+                        'Authorization' => "Bearer #{token}"}
+        )
+        raise(JSON.parse(response.body)['error']) unless response.code == 200
 
         puts "Upload complete"
-        response.code == 200 ? 0 : response.code
+        0
       rescue Exception => e
         puts "Upload failed - #{e}"
-        0
+        1001
       end
     end
   end
