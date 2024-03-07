@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
   s.executables = ['appstage']
   s.require_path = 'lib'
   s.add_dependency 'httparty', '~>0.18.1'
-  s.add_dependency 'mimemagic', '~>0.3.5'
+  s.add_development_dependency 'rspec', '~> 3.6'
+  s.add_development_dependency 'webmock', '~> 3.23'
 end

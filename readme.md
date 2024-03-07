@@ -33,21 +33,22 @@ Usage: appstage <command> [options]
         --help                       Show this help message
  Options:-
     -j, --jwttoken JWT               Your appstage.io account JWT token
-    -p, --project_id ID              Your appstage.io project id
     -h, --host HOSTURL               The appstage host, optional, leave blank to use live server
 ```
 
 Example shell script used within a CI build script:-
 
 ```
-# Delete current live apks
-appstage -d .apk -j $APPSTAGE_JWT
+gem update appstage
+
+# Delete current live ipas using regex
+appstage -d .ipa -h $APPSTAGE_HOST -j $APPSTAGE_JWT
 
 # Upload new build files
-FILES="*.apk"
+FILES=build/*.ipa
 for f in $FILES
 do
-	appstage -u "$f" -j $APPSTAGE_JWT
+	appstage -u $f -h $APPSTAGE_HOST -j $APPSTAGE_JWT
 done
 ```
 

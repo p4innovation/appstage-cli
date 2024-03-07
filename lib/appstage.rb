@@ -1,8 +1,6 @@
-#Appstage cli for uploading live builds
 require 'optparse'
 require 'httparty'  #GEM
 require 'digest'
-require 'mimemagic'
 require 'list_files'
 require 'delete_files'
 require 'upload_file'
@@ -37,12 +35,8 @@ module AppStage
 
       parser.separator " Options:-"
 
-      parser.on("-j", "--jwttoken JWT", "Your appstage.io account JWT token") do |v|
+      parser.on("-j", "--jwttoken JWT", "Your appstage.io project token") do |v|
         options[:jwt] = v
-      end
-
-      parser.on("-p", "--project_id ID", "Your appstage.io project id") do |v|
-        options[:project_id] = v
       end
 
       parser.on("-h", "--host HOSTURL", "The appstage host, optional, leave blank to use live server") do |v|
