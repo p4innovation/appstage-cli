@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.files     = ['lib/appstage.rb', 'lib/list_files.rb', 'lib/upload_file.rb', 'lib/delete_files.rb', 'lib/version.rb']
   s.executables = ['appstage']
   s.require_path = 'lib'
-  s.add_dependency 'httparty', '~>0.18.1'
+  s.add_dependency 'httparty', '~>0.21'
   s.add_development_dependency 'rspec', '~> 3.6'
   s.add_development_dependency 'webmock', '~> 3.23'
 end
