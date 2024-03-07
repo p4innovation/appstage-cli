@@ -17,21 +17,20 @@ module AppStage
           puts " deleting #{rf['name']}"
           delete_file(rf['id'])
         end
-
+        0
       rescue Exception => e
         puts "Delete failed - #{e.message}"
-        return 1
+        -1
       end
-      0
     end
 
   private
 
     def delete_file(file_id)
-      host = @options[:host] or "https://www.appstage.io"
+      host = @options[:host] || "https://www.appstage.io"
       token = @options[:jwt]
 
-      response = HTTParty.delete(host+"/api/live_builds/#{file_id}.json",
+      response = HTTParty.delete(host+"/api/live_builds/#{file_id}",
           :headers => { 'Content-Type' => 'application/json',
                         'Authorization' => "Bearer #{token}"}
       )
