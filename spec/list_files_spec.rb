@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe AppStage::ListFiles do
+RSpec.describe AppStage::ListFiles do
     describe 'with invalid arguments' do
         it 'should require a access token' do
             options = {}
@@ -44,6 +44,77 @@ describe AppStage::ListFiles do
 
             expect(STDOUT).to receive(:puts).with('Motorise_V1.0.2.82.ipa')
             options = {jwt: "1239834u34hf", upload: './spec/fixtures/testfile.txt', list: '.ipa'}
+            expect(AppStage::ListFiles.new(options).execute).to eq(0)
+        end
+
+        it 'should filter files using regex pattern' do
+            stub_request(:get, "https://www.appstage.io/api/live_builds").to_return(
+                body: '{"release_files":[{"id":"1","name":"app-v1.0.ipa","created_at":"2024-02-23T09:39:50.823Z","size":1000},{"id":"2","name":"app-v2.0.ipa","created_at":"2024-02-23T09:40:11.965Z","size":2000},{"id":"3","name":"app-v1.0.apk","created_at":"2024-02-23T09:40:11.965Z","size":3000}]}',
+                status: 200
+            )
+
+            expect(STDOUT).to receive(:puts).with('app-v1.0.ipa')
+            expect(STDOUT).to receive(:puts).with('app-v2.0.ipa')
+            options = {jwt: "token", list: '\.ipa$'}
+            expect(AppStage::ListFiles.new(options).execute).to eq(0)
+        end
+
+        it 'should handle complex regex patterns' do
+            stub_request(:get, "https://www.appstage.io/api/live_builds").to_return(
+                body: '{"release_files":[{"id":"1","name":"app-v1.0.ipa"},{"id":"2","name":"app-v2.0.ipa"},{"id":"3","name":"app-debug-v1.0.ipa"}]}',
+                status: 200
+            )
+
+            expect(STDOUT).to receive(:puts).with('app-v1.0.ipa')
+            expect(STDOUT).to receive(:puts).with('app-v2.0.ipa')
+            options = {jwt: "token", list: 'app-v\d+\.\d+\.ipa'}
+            expect(AppStage::ListFiles.new(options).execute).to eq(0)
+        end
+    end
+
+    describe 'with custom host' do
+        it 'should use the provided host URL' do
+            options = {jwt: "token", host: "https://custom.appstage.io"}
+            stub_request(:get, "https://custom.appstage.io/api/live_builds").to_return(
+                body: '{"release_files":[{"id":"1","name":"test.ipa"}]}',
+                status: 200
+            )
+
+            expect(STDOUT).to receive(:puts).with('test.ipa')
+            expect(AppStage::ListFiles.new(options).execute).to eq(0)
+        end
+    end
+
+    describe 'error handling' do
+        it 'should handle network errors gracefully' do
+            options = {jwt: "token"}
+            stub_request(:get, "https://www.appstage.io/api/live_builds").to_raise(Net::ReadTimeout)
+
+            expect(STDOUT).to receive(:puts).with(/File listing failed/)
+            expect(AppStage::ListFiles.new(options).execute).to eq(-1)
+        end
+
+        it 'should handle malformed JSON response' do
+            options = {jwt: "token"}
+            stub_request(:get, "https://www.appstage.io/api/live_builds").to_return(
+                body: 'invalid json',
+                status: 200
+            )
+
+            expect(STDOUT).to receive(:puts).with(/File listing failed/)
+            expect(AppStage::ListFiles.new(options).execute).to eq(-1)
+        end
+    end
+
+    describe 'when release_files is empty' do
+        it 'should not output anything' do
+            options = {jwt: "token"}
+            stub_request(:get, "https://www.appstage.io/api/live_builds").to_return(
+                body: '{"release_files":[]}',
+                status: 200
+            )
+
+            expect(STDOUT).not_to receive(:puts)
             expect(AppStage::ListFiles.new(options).execute).to eq(0)
         end
     end

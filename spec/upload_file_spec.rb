@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe AppStage::UploadFile do
+RSpec.describe AppStage::UploadFile do
     describe 'with invalid arguments' do
         it 'should require a access token' do
             options = {upload: "testfile.txt"}
@@ -39,6 +39,79 @@ describe AppStage::UploadFile do
             expect(STDOUT).to receive(:puts).with('Upload complete')
             options = {jwt: "1239834u34hf", upload: './spec/fixtures/testfile.txt'}
             expect(AppStage::UploadFile.new(options).execute).to eq(0)
+        end
+    end
+
+    describe 'file validation' do
+        it 'should handle non-existent files' do
+            options = {jwt: "token", upload: './non_existent_file.txt'}
+            
+            expect(STDOUT).to receive(:puts).with(/Upload failed/)
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+    end
+
+    describe 'with custom host' do
+        it 'should use the provided host URL' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt', host: "https://custom.appstage.io"}
+            mock_multipart_request('https://custom.appstage.io/api/live_builds', 200, {"id": "test"})
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with('Upload complete')
+            expect(AppStage::UploadFile.new(options).execute).to eq(0)
+        end
+    end
+
+    describe 'error handling' do
+        it 'should handle network errors gracefully' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
+            stub_request(:post, "https://www.appstage.io/api/live_builds")
+                .to_raise(Net::ReadTimeout)
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with(/Upload failed/)
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+
+        it 'should handle server errors' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
+            mock_multipart_request('https://www.appstage.io/api/live_builds', 500, {"error": "Internal Server Error"})
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with('Upload failed - Internal Server Error')
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+
+        it 'should handle malformed JSON response' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
+            headers = { 'Content-Type' => /multipart\/form-data/ }
+            match_multipart_body = ->(request) do
+                request.body.force_encoding('BINARY')
+                request.body =~ /testfile.txt/
+            end
+            stub_request(:post, "https://www.appstage.io/api/live_builds")
+                .with(headers: headers, &match_multipart_body)
+                .to_return(body: 'invalid json', status: 200)
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with(/Upload failed/)
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+    end
+
+    describe 'authentication' do
+        it 'should include JWT token in Authorization header' do
+            token = "test-jwt-token"
+            options = {jwt: token, upload: './spec/fixtures/testfile.txt'}
+            
+            stub = stub_request(:post, "https://www.appstage.io/api/live_builds")
+                .with(headers: { 'Authorization' => "Bearer #{token}" })
+                .to_return(body: '{"id": "test"}', status: 200)
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with('Upload complete')
+            AppStage::UploadFile.new(options).execute
+            expect(stub).to have_been_requested
         end
     end
 end

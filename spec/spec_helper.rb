@@ -4,7 +4,22 @@ require 'webmock/rspec'
 
 Bundler.require
 
+$LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
+require 'appstage'
+require 'list_files'
+require 'delete_files'
+require 'upload_file'
+require 'version'
+
 RSpec.configure do |config|
+  config.before(:each) do
+    @original_stdout = $stdout
+    $stdout = STDOUT
+  end
+  
+  config.after(:each) do
+    $stdout = @original_stdout if @original_stdout
+  end
 end
 
 
