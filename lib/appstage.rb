@@ -1,10 +1,10 @@
 require 'optparse'
 require 'httparty'  #GEM
 require 'digest'
-require 'list_files'
-require 'delete_files'
-require 'upload_file'
-require 'version'
+require_relative 'list_files'
+require_relative 'delete_files'
+require_relative 'upload_file'
+require_relative 'version'
 
 module AppStage
 
