@@ -3,3 +3,4 @@ Gemfile.lock
 *.ipa
 *.sh
 CLAUDE.md
+coverage/
