@@ -1,6 +1,7 @@
 # Appstage CLI
 
 [![Gem Version](https://badge.fury.io/rb/appstage.svg)](https://badge.fury.io/rb/appstage)
+[![CI](https://github.com/p4innovation/appstage-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/p4innovation/appstage-cli/actions/workflows/ci.yml)
 
 A CLI gem to allow uploading to project live builds on [appstage.io](https://wwww.appstage.io). The intention of this Gem is for use with CI and command line builds. A successful build can use the gem to upload the completed build to the live build area on an appstage project and make it available instantly to clients without any developer intervention. 
 
