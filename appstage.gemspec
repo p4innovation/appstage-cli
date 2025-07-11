@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.required_ruby_version = '>= 3.1.0'
   s.add_dependency 'httparty', '~>0.21'
+  s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.6'
   s.add_development_dependency 'webmock', '~> 3.23'
 end
