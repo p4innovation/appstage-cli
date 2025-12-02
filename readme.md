@@ -16,7 +16,7 @@ gem install appstage
 Update your Gemfile:
 
 ```
-gem 'appstage', '->0.8.0'
+gem 'appstage', '->1.0.0'
 ```
 
 ## Usage
@@ -52,6 +52,13 @@ do
 	appstage -u $f -h $APPSTAGE_HOST -j $APPSTAGE_JWT
 done
 ```
+
+## History
+
+### V1.0.14
+
+* Improved upload speed and reliability by utilising direct signed CDN upload
+
 
 ## License & Copyright
 
