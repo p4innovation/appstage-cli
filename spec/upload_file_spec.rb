@@ -22,7 +22,7 @@ RSpec.describe AppStage::UploadFile do
     describe 'when the upload fails' do
         it 'should return the error request throws' do
             options = {jwt: "1239834u34hf", upload: './spec/fixtures/testfile.txt'}
-            mock_multipart_request('https://www.appstage.io/api/live_builds', 401, {"error":"Not Authorized"})
+            mock_direct_upload_error('https://www.appstage.io', 401, "Not Authorized")
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with('Upload failed - Not Authorized')
@@ -32,8 +32,7 @@ RSpec.describe AppStage::UploadFile do
 
     describe 'when the upload succeeds' do
         it 'should return success' do
-            mock_multipart_request('https://www.appstage.io/api/live_builds', 200, 
-                {"created_at":"2024-03-07T10:52:16.673Z","display_name":"readme.md","id":"ec6b6c76-6358-44f2-b2b3-044053a2067b","release_id":"d6d98189-584f-4a76-924a-b58867a1d579"})
+            mock_direct_upload_flow('https://www.appstage.io')
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with('Upload complete')
@@ -54,7 +53,7 @@ RSpec.describe AppStage::UploadFile do
     describe 'with custom host' do
         it 'should use the provided host URL' do
             options = {jwt: "token", upload: './spec/fixtures/testfile.txt', host: "https://custom.appstage.io"}
-            mock_multipart_request('https://custom.appstage.io/api/live_builds', 200, {"id": "test"})
+            mock_direct_upload_flow('https://custom.appstage.io')
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with('Upload complete')
@@ -65,7 +64,7 @@ RSpec.describe AppStage::UploadFile do
     describe 'error handling' do
         it 'should handle network errors gracefully' do
             options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
-            stub_request(:post, "https://www.appstage.io/api/live_builds")
+            stub_request(:post, "https://www.appstage.io/api/direct_uploads")
                 .to_raise(Net::ReadTimeout)
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
@@ -75,7 +74,7 @@ RSpec.describe AppStage::UploadFile do
 
         it 'should handle server errors' do
             options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
-            mock_multipart_request('https://www.appstage.io/api/live_builds', 500, {"error": "Internal Server Error"})
+            mock_direct_upload_error('https://www.appstage.io', 500, "Internal Server Error")
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with('Upload failed - Internal Server Error')
@@ -84,17 +83,58 @@ RSpec.describe AppStage::UploadFile do
 
         it 'should handle malformed JSON response' do
             options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
-            headers = { 'Content-Type' => /multipart\/form-data/ }
-            match_multipart_body = ->(request) do
-                request.body.force_encoding('BINARY')
-                request.body =~ /testfile.txt/
-            end
-            stub_request(:post, "https://www.appstage.io/api/live_builds")
-                .with(headers: headers, &match_multipart_body)
+            stub_request(:post, "https://www.appstage.io/api/direct_uploads")
                 .to_return(body: 'invalid json', status: 200)
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with(/Upload failed/)
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+
+        it 'should handle CDN upload failure' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
+            cdn_url = "https://s3.amazonaws.com/test-bucket/uploads/test-key"
+
+            stub_request(:post, "https://www.appstage.io/api/direct_uploads")
+                .to_return(body: {
+                    signed_id: "test-signed-blob-id",
+                    direct_upload: {
+                        url: cdn_url,
+                        headers: { "Content-Type" => "application/octet-stream" }
+                    }
+                }.to_json, status: 200)
+
+            stub_request(:put, cdn_url)
+                .to_return(body: "", status: 500)
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with(/Upload failed.*CDN upload failed/)
+            expect(AppStage::UploadFile.new(options).execute).to eq(-1)
+        end
+
+        it 'should handle release creation failure' do
+            options = {jwt: "token", upload: './spec/fixtures/testfile.txt'}
+            cdn_url = "https://s3.amazonaws.com/test-bucket/uploads/test-key"
+            signed_id = "test-signed-blob-id"
+
+            stub_request(:post, "https://www.appstage.io/api/direct_uploads")
+                .to_return(body: {
+                    signed_id: signed_id,
+                    direct_upload: {
+                        url: cdn_url,
+                        headers: { "Content-Type" => "application/octet-stream" }
+                    }
+                }.to_json, status: 200)
+
+            stub_request(:put, cdn_url)
+                .to_return(body: "", status: 200)
+
+            stub_request(:post, "https://www.appstage.io/api/live_builds")
+                .with(body: { signed_blob_id: signed_id }.to_json)
+                .to_return(body: { error: "Storage quota exceeded" }.to_json, status: 422)
+
+            expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
+            expect(STDOUT).to receive(:puts).with('Upload failed - Storage quota exceeded')
             expect(AppStage::UploadFile.new(options).execute).to eq(-1)
         end
     end
@@ -103,15 +143,34 @@ RSpec.describe AppStage::UploadFile do
         it 'should include JWT token in Authorization header' do
             token = "test-jwt-token"
             options = {jwt: token, upload: './spec/fixtures/testfile.txt'}
-            
-            stub = stub_request(:post, "https://www.appstage.io/api/live_builds")
+            cdn_url = "https://s3.amazonaws.com/test-bucket/uploads/test-key"
+            signed_id = "test-signed-blob-id"
+
+            direct_upload_stub = stub_request(:post, "https://www.appstage.io/api/direct_uploads")
                 .with(headers: { 'Authorization' => "Bearer #{token}" })
+                .to_return(body: {
+                    signed_id: signed_id,
+                    direct_upload: {
+                        url: cdn_url,
+                        headers: { "Content-Type" => "application/octet-stream" }
+                    }
+                }.to_json, status: 200)
+
+            stub_request(:put, cdn_url)
+                .to_return(body: "", status: 200)
+
+            release_stub = stub_request(:post, "https://www.appstage.io/api/live_builds")
+                .with(
+                    headers: { 'Authorization' => "Bearer #{token}" },
+                    body: { signed_blob_id: signed_id }.to_json
+                )
                 .to_return(body: '{"id": "test"}', status: 200)
 
             expect(STDOUT).to receive(:puts).with('Uploading testfile.txt 25 bytes...')
             expect(STDOUT).to receive(:puts).with('Upload complete')
             AppStage::UploadFile.new(options).execute
-            expect(stub).to have_been_requested
+            expect(direct_upload_stub).to have_been_requested
+            expect(release_stub).to have_been_requested
         end
     end
 end
